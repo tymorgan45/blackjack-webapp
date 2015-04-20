@@ -1,7 +1,9 @@
 require 'rubygems'
 require 'sinatra'
 
-set :sessions, true
+use Rack::Session::Cookie, :key => 'rack.session',
+                           :path => '/',
+                           :secret => 'dog_pound'
 
 BLACKJACK_AMOUNT = 21
 DEALER_STAYS = 17
@@ -49,21 +51,21 @@ helpers do
   end
 
   def winner!(msg)
-    @success = "#{session[:player_name]} won! #{msg}"
+    @winner = "#{session[:player_name]} won! #{msg}"
     @show_hit_and_stay_buttons = false
     @show_play_again = true
     session[:player_pot] += session[:player_bet].to_i
   end
 
   def loser!(msg)
-    @error = "Dealer won. #{msg}"
+    @loser = "Dealer won. #{msg}"
     @show_hit_and_stay_buttons = false
     @show_play_again = true
     session[:player_pot] -= session[:player_bet].to_i
   end
 
   def tie!
-    @success = "It's a Draw at #{calculate_total(session[:players_cards])}."
+    @winner = "It's a Draw at #{calculate_total(session[:players_cards])}."
     @show_hit_and_stay_buttons = false
     @show_play_again = true
   end
@@ -72,7 +74,7 @@ end
 get '/' do
   if session[:player_name]
     redirect '/game'
-  else9mmm
+  else
     redirect '/new_player'
   end
 end
